@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 labelText: 'REAL',
               ),
               inputFormatters: [
-                CurrentMask(),
+                CurrencyMask(),
               ],
             ),
             const SizedBox(height: 10),
@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 labelText: 'DOLAR',
               ),
               inputFormatters: [
-                CurrentMask(symbol: r'$ ', decimal: ',', cents: '.'),
+                CurrencyMask(symbol: r'$ ', decimal: ',', cents: '.'),
               ],
             ),
             const SizedBox(height: 10),
@@ -131,12 +131,12 @@ class MaskInput extends TextInputFormatter {
   }
 }
 
-class CurrentMask extends TextInputFormatter {
+class CurrencyMask extends TextInputFormatter {
   final String symbol;
   final String decimal;
   final String cents;
 
-  CurrentMask({
+  CurrencyMask({
     this.symbol = r'R$ ',
     this.decimal = '.',
     this.cents = ',',
