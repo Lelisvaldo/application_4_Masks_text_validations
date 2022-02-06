@@ -57,7 +57,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 MaskInput('###.###.###-##'),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
+            TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'REAL',
+              ),
+              inputFormatters: [
+                CurrentMask(),
+              ],
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'DOLAR',
+              ),
+              inputFormatters: [
+                CurrentMask(symbol: r'$ ', decimal: ',', cents: '.'),
+              ],
+            ),
+            const SizedBox(height: 10),
             TextFormField(
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (text) {
@@ -86,7 +108,6 @@ class MaskInput extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-
     var value = newValue.text.replaceAll(RegExp(r'\D'), '');
     var formatted = mask;
     for (var i = 0; i < value.length; i++) {
@@ -101,6 +122,60 @@ class MaskInput extends TextInputFormatter {
       }
     }
 
+    return newValue.copyWith(
+      text: formatted,
+      selection: TextSelection.fromPosition(
+        TextPosition(offset: formatted.length),
+      ),
+    );
+  }
+}
+
+class CurrentMask extends TextInputFormatter {
+  final String symbol;
+  final String decimal;
+  final String cents;
+
+  CurrentMask({
+    this.symbol = r'R$ ',
+    this.decimal = '.',
+    this.cents = ',',
+  });
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    var value = newValue.text.replaceAll(RegExp(r'\D'), '');
+
+    value = (int.tryParse(value) ?? 0).toString();
+
+    if(value.length < 3){
+      value = value.padLeft(3, '0');
+    }
+
+    value = value.split('').reversed.join();
+
+    final listCharacterers = [];
+    var decimalCount = 0;
+
+    for (var i = 0; i < value.length; i++){
+      if(i == 2){
+        listCharacterers.insert(0, cents);
+      }
+      if(i > 2){
+        decimalCount++;
+      }
+      if(decimalCount == 3){
+        listCharacterers.insert(0, decimal);
+        decimalCount = 0;
+      }
+
+      listCharacterers.insert(0, value[i]);
+    }
+
+    listCharacterers.insert(0, symbol);
+    var formatted = listCharacterers.join();
+    
     return newValue.copyWith(
       text: formatted,
       selection: TextSelection.fromPosition(
