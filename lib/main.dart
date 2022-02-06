@@ -41,15 +41,36 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (text) {
+                if (!RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$')
+                    .hasMatch(text ?? '')) {
+                  return "Write CPF valid.";
+                }
+              },
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'CPF',
               ),
               inputFormatters: [
-                CPFMask(),
+                MaskInput('###.###.###-##'),
               ],
-            )
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (text) {
+                if (!RegExp(r'[a-zA-Z0-9.-_]+@[a-zA-Z0-9-_]+\..+')
+                    .hasMatch(text ?? '')) {
+                  return "Write E-mail valid.";
+                }
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'E-mail',
+              ),
+            ),
           ],
         ),
       ),
@@ -57,26 +78,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class CPFMask extends TextInputFormatter {
+class MaskInput extends TextInputFormatter {
+  final String mask;
+
+  MaskInput(this.mask);
+
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    var cpf = newValue.text;
-    if (cpf.length > 14) {
-      return oldValue;
+      TextEditingValue oldValue, TextEditingValue newValue) {
+
+    var value = newValue.text.replaceAll(RegExp(r'\D'), '');
+    var formatted = mask;
+    for (var i = 0; i < value.length; i++) {
+      formatted = formatted.replaceFirst('#', value[i]);
     }
-
-    cpf = cpf.replaceAll(RegExp(r'\D'), '');
-    var formatted = '';
-
-    //xxx.xxx.xxx-xx
-    for (var i = 0; i < cpf.characters.length; i++) {
-      if ([3, 6, 9].contains(i)) {
-        formatted += i == 9 ? '-' : '.';
+    final lastHash = formatted.indexOf('#');
+    if (lastHash != -1) {
+      formatted = formatted.characters.getRange(0, lastHash).join();
+      if (RegExp(r'\D$').hasMatch(formatted)) {
+        formatted =
+            formatted.split('').getRange(0, formatted.length - 1).join();
       }
-      formatted += cpf[i];
     }
 
     return newValue.copyWith(
